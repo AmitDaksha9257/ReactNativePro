@@ -1,0 +1,1 @@
+export var appLogo = '/home/andr2/Documents/projects/react_native/First/First/asset/user.png';
