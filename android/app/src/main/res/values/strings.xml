@@ -1,5 +1,4 @@
 <resources>
     <string name="app_name">InHouse</string>
     <string name="facebook_app_id">2032510806776234</string>
-<string name="fb_login_protocol_scheme">fb2032510806776234</string>
 </resources>

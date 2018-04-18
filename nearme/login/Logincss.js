@@ -45,7 +45,9 @@ export const styles = StyleSheet.create({
     backgroundColor: '#0565c9',
     height: 40,
     borderRadius: 12,
-    marginTop: 20
+    marginTop: 20,
+    justifyContent:'center',
+    paddingTop:5,
   },
   socialLoginBtnImage: {
     height: 25,

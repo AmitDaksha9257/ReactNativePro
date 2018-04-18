@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import {
     View, Text, Image, StyleSheet,
     TextInput, Dimensions, ScrollView,
-    TouchableHighlight, Platform, TouchableOpacity, Alert,PermissionsAndroid
+    TouchableHighlight, Platform, TouchableOpacity, Alert, PermissionsAndroid,StatusBar
 } from 'react-native';
 import Button from 'react-native-button';
 import { learnColour } from '../../asset/left-menu.png';
@@ -18,7 +18,7 @@ export default class Home extends Component {
         console.log("InSideNvigate");
         const navigateAction = NavigationActions.navigate({
             routeName: name,
-            params: { placeSearch: this.state.typedText,LatLng: this.state.lat_lng}
+            params: { placeSearch: this.state.typedText, LatLng: this.state.lat_lng }
         });
         this.props.navigation.dispatch(navigateAction);
     }
@@ -31,7 +31,7 @@ export default class Home extends Component {
             longitude: null,
             error: null,
             inputText: '',
-            lat_lng:null,
+            lat_lng: null,
         };
     }
 
@@ -41,7 +41,7 @@ export default class Home extends Component {
 
     // Check Location Permission
     async getLocationPermissions() {
-        console.log("getLocationPermission"+"iddidd");
+        console.log("getLocationPermission" + "iddidd");
         const chckLocationPermission = PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
         if (chckLocationPermission === PermissionsAndroid.RESULTS.GRANTED) {
             this.getCurrentLoc();
@@ -61,15 +61,15 @@ export default class Home extends Component {
                     Alert.alert("You don't have access for the location");
                 }
             } catch (err) {
-                Alert.alert("LocationErroris"+err)
+                Alert.alert("LocationErroris" + err)
             }
         }
     }
 
     // To get Current Location
     getCurrentLoc() {
-        console.log("getCurrentLoc","Inside");
-        
+        console.log("getCurrentLoc", "Inside");
+
         navigator.geolocation.getCurrentPosition((position) => {
             console.log("Current_Position", "wookeey");
             console.log("Current_Position", position);
@@ -77,7 +77,7 @@ export default class Home extends Component {
                 latitude: position.coords.latitude,
                 longitude: position.coords.longitude,
                 error: null,
-                lat_lng:position.coords.latitude+","+position.coords.longitude,
+                lat_lng: position.coords.latitude + "," + position.coords.longitude,
             });
         }, (error) => this.setState({ error: error.message }),
             console.log("ERRRORRR"),
@@ -100,6 +100,8 @@ export default class Home extends Component {
         return (
             <ScrollView>
                 <View style={styles.container}>
+
+                    <StatusBar backgroundColor='#03004e' />
                     {/* <Text>{this.state.error}</Text>
                     <Text>{this.state.latitude}</Text> */}
                     <View style={{ backgroundColor: '#3B227B', height: 50, alignItems: 'center', flexDirection: 'row' }}>

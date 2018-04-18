@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import styles from './SideMenu.style.js';
 import { NavigationActions } from 'react-navigation';
-import { ScrollView, Text, View, Image, TouchableWithoutFeedback } from 'react-native';
+import { ScrollView, Text, View, Image, TouchableWithoutFeedback,StatusBar } from 'react-native';
 
 class SideMenu extends Component {
 
@@ -22,6 +22,7 @@ class SideMenu extends Component {
   render() {
     return (
       <View style={styles.container}>
+        <StatusBar backgroundColor='#03004e' />
 
         <View style={{ backgroundColor: '#29124f', height: 100, flexDirection: 'row', alignItems: 'center' }} >
           <Image style={{ height: 50, width: 50, marginLeft: 15 }}

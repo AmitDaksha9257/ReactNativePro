@@ -69,7 +69,7 @@ export default class Listing extends Component {
         console.log("FetchData");
         console.log("LatitudeLongitude", this.state.lat_lng);
         try {
-            const response = await fetch("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + this.state.lat_lng + "&radius=500&keyword=" + this.state.searchName + "&key=AIzaSyBq2vZw0vfoiTSm2DypMQ6-odWpsJYLCEc");
+            const response = await fetch("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + this.state.lat_lng + "&radius=1500&keyword=" + this.state.searchName + "&key=AIzaSyBq2vZw0vfoiTSm2DypMQ6-odWpsJYLCEc");
             const json = await response.json();
             console.log("API_STATUS", json.status);
             if (json.status == "OK") {
@@ -163,11 +163,11 @@ export default class Listing extends Component {
                                 destinationLng: item.geometry.location.lng,
                             })
                             //Invisible start rating when no rating available
-                            if(item.find('rating')){
-                                console.log('RatingAvailable');
-                            }else{
-                                console.log('Rating Not available');
-                            }
+                            // if(item.find('rating')){
+                            //     console.log('RatingAvailable');
+                            // }else{
+                            //     console.log('Rating Not available');
+                            // }
                         } catch (error) {
                             console.log("ErrorMsg", error.message);
                         }

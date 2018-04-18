@@ -17,7 +17,16 @@ import { Left, Container, content, Header, Body, Icon, Content } from 'native-ba
 import { loginUser } from '../../ServerApi/Server'
 import { navigateToScreen } from '../../ServerApi/Server'
 
-import FBSDK,{LoginManager}from'react-native-fbsdk';
+//import FBSDK, { LoginManager, AccessToken ,LoginButton} from 'react-native-fbsdk';
+
+const FBSDK = require('react-native-fbsdk');
+const {
+  LoginButton,
+  AccessToken,
+  GraphRequest,
+  GraphRequestManager
+} = FBSDK;
+
 export default class Login extends Component {
 
   constructor(props) {
@@ -54,18 +63,37 @@ export default class Login extends Component {
     });
   }
   //Facebook Login Function
-  fbLoginFunc(){
-    console.log("InsideFbAuthenticate");
-      LoginManager.logInWithReadPermissions(['public_profile']).then(function(result){
-        if(result.isCancelled){
-          console.log('Login was Cancelled');
-        }else{
-          console.log('Login was a success'+result.grantedPermissions.toString());
-          console.log('FaceBookLoginResponse',result)
-        }
-      },function(error){
-        console.log('An error occured: '+error);
-      })
+  // fbLoginFunc() {
+  //   console.log("InsideFbAuthenticate");
+  //   LoginManager.logInWithReadPermissions(['public_profile']).then(function (result) {
+  //     if (result.isCancelled) {
+  //       console.log('Login was Cancelled');
+  //     } else {
+  //       console.log('Login was a success' + result.grantedPermissions.toString());
+  //       //console.log('Login was a success'+JSON.stringify(result));
+  //       //console.log('FaceBookLoginResponse',result)
+  //       //this.getAccessTokenUser().bind(this);
+
+  //     }
+  //   }, function (error) {
+  //     console.log('An error occured: ' + error);
+  //   })
+  // }
+  // getAccessTokenUser() {
+  //   Alert.alert("HLEl");
+  //   AccessToken.getCurrentAccessToken((token) => {
+  //     console.log("AccessTOken: ", token);
+  //   })
+  // }
+
+  //Create response callback.
+  _responseInfoCallback = (error, result) => {
+    if (error) {
+      alert('Error fetching data: ' + error.toString());
+    } else {
+      alert('Result Name: ' + result.name);
+      console.log("FullResult: ",JSON.stringify(result));
+    }
   }
   render() {
     return (
@@ -99,7 +127,7 @@ export default class Login extends Component {
               <Text style={{ color: 'white' }} >LOGIN</Text></View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={{ marginTop: 10 }} onPress={this.fbLoginFunc.bind(this)}>
+          {/* <TouchableOpacity style={{ marginTop: 10 }} >
             <View style={styles.socialLoginBtnView}>
               <Image source={require('../../asset/facebook.png')}
                 style={styles.socialLoginBtnImage}></Image>
@@ -108,12 +136,62 @@ export default class Login extends Component {
                 </Text>
             </View>
           </TouchableOpacity>
+           */}
+          <View style={styles.socialLoginBtnView}>
+            {/* <LoginButton
+          publishPermissions={["publish_actions"]}
+          
+          onLoginFinished={
+            (error, result) => {
+              if (error) {
+                //alert("login has error: " + result.error);
+              } else if (result.isCancelled) {
+               // alert("login is cancelled.");
+              } else {
+                AccessToken.getCurrentAccessToken().then(
+                  (data) => {
+                    //alert(data.accessToken.toString())
+                    console.log("AccessToken",data.accessToken);
+                  }
+                )
+              }
+            }
+          } */}
+            <LoginButton
+              publishPermissions={["publish_actions"]}
+              onLoginFinished={
+                (error, result) => {
+                  if (error) {
+                    alert("Login failed with error: " + result.error);
+
+                  } else if (result.isCancelled) {
+                    alert("Login was cancelled");
+                  } else {
+                    AccessToken.getCurrentAccessToken().then(
+                      (data) => {
+                        const infoRequest = new GraphRequest(
+                          '/me?fields=email,name,friends,picture',
+                          null,
+                          this._responseInfoCallback
+                        );
+                        // Start the graph request.
+                        new GraphRequestManager().addRequest(infoRequest).start();
+                      }
+                    )
+                  }
+                }
+              }
+              onLogoutFinished={() => alert("User logged out")} />
+
+          </View>
 
           <TouchableOpacity style={{ marginTop: 20 }}
             onPress={() => this.props.navigation.navigate("Signup")} >
             <View style={styles.buttonView}>
               <Text style={{ color: 'white' }}>SIGN UP</Text></View>
           </TouchableOpacity>
+
+
         </View>
       </ScrollView>
     );
