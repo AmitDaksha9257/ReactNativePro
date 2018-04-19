@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 import {
     View, Text, Image, StyleSheet, FlatList, ScrollView, TouchableOpacity, Alert,
-    TouchableHighlight, ActivityIndicator
+    TouchableHighlight, ActivityIndicator, BackHandler
 } from 'react-native';
 import Button from 'react-native-button';
 import Stars from 'react-native-stars';
@@ -15,6 +15,7 @@ import Spinner from 'react-native-loading-spinner-overlay';
 
 export default class Listing extends Component {
 
+    //Open GogleMap App whit source and destination 
     handleGetDirections = () => {
         const data = {
 
@@ -39,6 +40,8 @@ export default class Listing extends Component {
 
     constructor(props) {
         super(props);
+
+        console.log("LifeCycle","constructor");
         console.log("TextFromScreen", this.props.navigation.state.params.placeSearch);
         this.state = ({
             searchName: this.props.navigation.state.params.placeSearch,
@@ -50,13 +53,24 @@ export default class Listing extends Component {
             destinationLng: null,
             visible: true,
             text: "Loading...",
-            ratingVisblity: true,
+            ratingVisblity: false,
         });
         console.log("DataFromScreen", this.state.searchName);
         console.log("DataFromScreen", this.state.lat_lng);
+
+        //Handle Backpress here
+        BackHandler.addEventListener('hardwareBackPress', function () {
+            props.navigation.navigate("MyApp");
+            return true;
+        });
+       
     }
+    
+   
+
     componentDidMount() {
-        if (this.state.searchName != null) {
+        console.log("LifeCycle","componentDidMount");
+            if (this.state.searchName != null) {
             console.log("insidSearchName");
             this.fetchData();
         } else {
@@ -69,25 +83,44 @@ export default class Listing extends Component {
         console.log("FetchData");
         console.log("LatitudeLongitude", this.state.lat_lng);
         try {
-            const response = await fetch("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + this.state.lat_lng + "&radius=1500&keyword=" + this.state.searchName + "&key=AIzaSyBq2vZw0vfoiTSm2DypMQ6-odWpsJYLCEc");
+            const response = await fetch("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + this.state.lat_lng + "&radius=5000&keyword=" + this.state.searchName + "&key=AIzaSyBq2vZw0vfoiTSm2DypMQ6-odWpsJYLCEc");
             const json = await response.json();
             console.log("API_STATUS", json.status);
             if (json.status == "OK") {
                 this.setState({
                     allPlacesGoogle: json.results,
                     visible: !this.state.visible,
+                    navigationBarVisiblity: true,
                 });
 
             } else if (json.status == "ZERO_RESULTS") {
                 this.setState({
-                    visible: this.state.visible,
+                    visible: !this.state.visible,
                     text: "No Result Found"
                 });
+
+                Alert.alert(
+                    'Message',
+                    'No Result Found',
+                    [
+                        {text:'Ok',onPress:()=>this.props.navigation.navigate("MyApp")}  
+                    ]
+                );
+
             } else {
                 this.setState({
-                    visible: this.state.visible,
+                    visible: !this.state.visible,
                     text: "Exceed API Daily Limits"
                 });
+
+                Alert.alert(
+                    'Message',
+                    'Exceed API Daily Limits',
+                    [
+                        {text:'Ok',onPress:()=>this.props.navigation.navigate("MyApp")}  
+                    ]
+                );
+
 
             }
         } catch (error) {
@@ -99,6 +132,7 @@ export default class Listing extends Component {
         //console.log("LocationDestination","ddd"+this.state.allPlacesGoogle.geometry.location.lng);
     }
     render() {
+        console.log("LifeCycle","render");
         const { navigate } = this.props.navigation;
         const { params } = this.props.navigation.state;
         return (
@@ -106,10 +140,10 @@ export default class Listing extends Component {
             <View style={{ flex: 1, flexDirection: 'column', }}>
 
                 <Spinner visible={this.state.visible} textContent={this.state.text}
-                    textStyle={{ color: '#FFF' }}
-                    cancelable={true} />
+                    textStyle={{ color: '#03004e' }}
+                    cancelable={false} />
 
-                <View style={{
+                {this.state.navigationBarVisiblity ? <View style={{
                     backgroundColor: '#3B227B', height: 50, alignItems: 'center',
                     justifyContent: 'space-between', flexDirection: 'row'
                 }}>
@@ -127,7 +161,7 @@ export default class Listing extends Component {
                         {/* <Image source={require('../../asset/serach-icon.png')}
                             style={{ height: 20, width: 20 }}></Image> */}
                     </View>
-                </View>
+                </View> : null}
                 {/* Showing My Current Location tab */}
                 {/* <View style={{
                     padding: 5,
@@ -162,6 +196,18 @@ export default class Listing extends Component {
                                 destinationLat: item.geometry.location.lat,
                                 destinationLng: item.geometry.location.lng,
                             })
+                            let iteStr=JSON.stringify(item);
+                            if(iteStr.includes('rating')){
+                                console.log("insidee");
+                                this.setState({
+                                    ratingVisblity:true,
+                                })
+                            }else{
+                                console.log("outsidee");
+                                this.setState({
+                                    ratingVisblity:false,
+                                })
+                            }
                             //Invisible start rating when no rating available
                             // if(item.find('rating')){
                             //     console.log('RatingAvailable');
@@ -197,7 +243,8 @@ export default class Listing extends Component {
                                         marginLeft: 5,
                                     }}>
                                         <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
-                                        <View style={{ flexDirection: 'row', marginLeft: 2 }}>
+                                        
+                                       <View style={{ flexDirection: 'row', marginLeft: 2 }}>
                                             <Text style={styles.rating}>{item.rating}</Text>
 
                                             <Stars
@@ -205,11 +252,11 @@ export default class Listing extends Component {
                                                 spacing={4}
                                                 starSize={16}
                                                 count={5}
+                                                disabled={true}
                                                 fullStar={require('../../asset/star.png')}
                                                 emptyStar={require('../../asset/empty_star.png')}
                                                 halfStarphotos={require('../../asset/half_star.png')} style={{ marginTop: 8, }} />
                                         </View>
-
 
 
                                         <Text style={styles.address} numberOfLines={2}>{item.vicinity}</Text>

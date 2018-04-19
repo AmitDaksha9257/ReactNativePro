@@ -4,7 +4,8 @@ import React, { Component } from 'react';
 import {
     View, Text, Image, StyleSheet,
     TextInput, Dimensions, ScrollView,
-    TouchableHighlight, Platform, TouchableOpacity, Alert, PermissionsAndroid,StatusBar
+    TouchableHighlight, Platform, TouchableOpacity, Alert, PermissionsAndroid, StatusBar,
+    ToastAndroid, BackHandler
 } from 'react-native';
 import Button from 'react-native-button';
 import { learnColour } from '../../asset/left-menu.png';
@@ -23,6 +24,10 @@ export default class Home extends Component {
         this.props.navigation.dispatch(navigateAction);
     }
 
+    //Detect Back press 
+    backPress() {
+        BackHandler.addEventListener('hardwareBackPress', this.navigateToScreen('Home'));
+    }
     constructor(props) {
         super(props);
         this.state = {
@@ -33,9 +38,20 @@ export default class Home extends Component {
             inputText: '',
             lat_lng: null,
         };
+       
+        //Handle BackPress
+        BackHandler.addEventListener('hardwareBackPress', function () {
+            // Alert.alert("Bacl");
+            // props.navigation.navigate("Login");
+            return true;
+        });
+
     }
 
+   
     componentDidMount() {
+
+
         this.getLocationPermissions();
     }
 
@@ -89,7 +105,8 @@ export default class Home extends Component {
         if (this.state.typedText != '') {
             this.navigateToScreen('Listing');
         } else {
-            Alert.alert('', 'Please enter text');
+            ToastAndroid.show('Please enter text first', ToastAndroid.SHORT);
+            // Alert.alert('', 'Please enter text');
 
         }
 
@@ -102,8 +119,7 @@ export default class Home extends Component {
                 <View style={styles.container}>
 
                     <StatusBar backgroundColor='#03004e' />
-                    {/* <Text>{this.state.error}</Text>
-                    <Text>{this.state.latitude}</Text> */}
+
                     <View style={{ backgroundColor: '#3B227B', height: 50, alignItems: 'center', flexDirection: 'row' }}>
                         <TouchableOpacity onPress={() => this.props.navigation.navigate("DrawerOpen")}>
                             <Image source={require('../../asset/left-menu.png')}
@@ -113,6 +129,7 @@ export default class Home extends Component {
                         <Text
                             style={{ color: 'white', fontSize: 20, marginLeft: 15, fontWeight: 'bold' }}>Home</Text>
                     </View>
+                    
                     <View style={{ flexDirection: 'column', alignItems: 'center', marginTop: 25, marginBottom: 10, }}>
                         <Image source={require('../../asset/logo-img.png')}></Image>
                         <Image source={require('../../asset/logo-text.png')}></Image>

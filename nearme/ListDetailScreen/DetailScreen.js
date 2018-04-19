@@ -180,24 +180,25 @@ export default class DetailScreen extends Component {
                                 marginRight: 5,
                                 color: 'black',
                                 marginBottom: 5,
-                            }}>4.5</Text>
+                            }}>{this.state.PlaceDetails.rating}</Text>
 
                             <Stars
-                                half={true}
-                                rating={4.5}
-                                update={(val) => { this.setState({ stars: val }) }}
+                                value={this.state.PlaceDetails.rating}                                
                                 spacing={4}
-                                starSize={14}
+                                starSize={16}
                                 count={5}
+                                disabled={true}
+                                backingColor='#e8eded'
                                 fullStar={require('../../asset/star.png')}
                                 emptyStar={require('../../asset/empty_star.png')}
-                                halfStar={require('../../asset/half_star.png')} style={{ marginTop: 8, }} />
+                                halfStar={require('../../asset/half_star.png')} style={{ marginTop: 8,
+                                backgroundColor:"black  " }} />
                         </View>
 
 
                         {/* <Text style={{
                             fontSize: 16, color: '#78909c',
-                            marginTop: 5,
+                            marginTop: 5,                                  
                         }}>Rusticalliy decorated dining room with ethnic art and painted walls
                     Serving classic Pastun dishes.</Text> */}
 

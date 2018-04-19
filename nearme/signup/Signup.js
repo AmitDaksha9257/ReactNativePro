@@ -6,7 +6,7 @@ import {
     StyleSheet,
     Text,
     View, ScrollView, Image, TextInput, TouchableOpacity, Alert,
-    NativeModules, ImageStore
+    NativeModules, ImageStore,ToastAndroid
 } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 //import RNImageToBase64 from 'react-native-image-to-base64';
@@ -115,7 +115,9 @@ export default class Signup extends Component {
     }
 
     funcAlert(msg) {
-        Alert.alert(msg);
+        //Alert.alert(msg);
+        ToastAndroid.show(msg, ToastAndroid.SHORT);
+
     }
 
     funcUserSignUp() {
@@ -132,7 +134,8 @@ export default class Signup extends Component {
                 //Go to Home Screen
                 navigateToScreen('MyApp', this.props);
             } else if (result.status == 0) {
-                Alert.alert(result.message);
+                ToastAndroid.show(result.message, ToastAndroid.SHORT);
+                //Alert.alert(result.message);
             }
         });
     }
@@ -142,7 +145,7 @@ export default class Signup extends Component {
             <ScrollView >
                 <View style={styles.container} >
                     <TouchableOpacity onPress={this.selectPhotoTapped.bind(this)}>
-                       {this.state.ImageSource === null ? <Image
+                        {this.state.ImageSource === null ? <Image
                             style={styles.ImageLogo}
                             source={require('../../asset/user.png')}
                         ></Image> :

@@ -10,7 +10,7 @@ import {
   StyleSheet,
   Text,
   View, AppRegistry,
-  ScrollView, Image, TextInput, Button, TouchableOpacity, StatusBar, Alert
+  ScrollView, Image, TextInput, Button, TouchableOpacity, StatusBar, Alert, ToastAndroid
 } from 'react-native';
 import { styles } from './Logincss.js'
 import { Left, Container, content, Header, Body, Icon, Content } from 'native-base'
@@ -38,10 +38,13 @@ export default class Login extends Component {
   }
   funLoginUser() {
     if (this.state._Email == null) {
-      Alert.alert("Please Enter Email");
+      //Alert.alert("Please Enter Email");
+
+      ToastAndroid.show('Please Enter Email', ToastAndroid.SHORT);
       return
     } else if (this.state._Password == null) {
-      Alert.alert("Please Enter Password");
+      //Alert.alert("Please Enter Password");
+      ToastAndroid.show('Please Enter Password', ToastAndroid.SHORT);
       return;
     }
 
@@ -57,7 +60,8 @@ export default class Login extends Component {
         //Go to Home Screen
         navigateToScreen('MyApp', this.props);
       } else if (result.status == 0) {
-        Alert.alert(result.message);
+        //Alert.alert(result.message);
+        ToastAndroid.show(result.message, ToastAndroid.SHORT);
       }
 
     });
@@ -92,7 +96,7 @@ export default class Login extends Component {
       alert('Error fetching data: ' + error.toString());
     } else {
       alert('Result Name: ' + result.name);
-      console.log("FullResult: ",JSON.stringify(result));
+      console.log("FullResult: ", JSON.stringify(result));
     }
   }
   render() {

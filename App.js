@@ -39,7 +39,7 @@ import  Listing  from './nearme/ListingScreen/Listing.js'
 
 import Login from './nearme/login/Login.js'
 import Signup from './nearme/signup/Signup.js'
-
+import Feedback from './nearme/FeedbackScreen/Feedback.js'
 
 const AppNavigtor = StackNavigator({
 
@@ -48,6 +48,7 @@ const AppNavigtor = StackNavigator({
   DetialScreen:{screen:DetialScreen},
   Signup: { screen: Signup },
   Login: { screen: Login },
+  Feedback:{screen: Feedback},
 },
   {
     headerMode: 'none'
@@ -58,7 +59,6 @@ const AppNavigtor = StackNavigator({
 export default class App extends Component {
   render() {
     return (
-     
       <AppNavigtor />
      
     );
