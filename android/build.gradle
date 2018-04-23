@@ -28,5 +28,6 @@ allprojects {
                 force 'com.facebook.android:facebook-android-sdk:4.31.0'
             }
         }
+
     }
 }

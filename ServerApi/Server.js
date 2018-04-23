@@ -4,6 +4,7 @@ import { NavigationActions } from 'react-navigation';
 
 const apiLoginUser='http://182.74.91.253/F-J/in_house/api/login';
 const apiSignUpUser='http://182.74.91.253/F-J/in_house/api/signup';
+const apiFeedbackUser='http://182.74.91.253/F-J/in_house/api/sendFeedback';
 
 //LoginUser
 async function loginUser(params) {
@@ -47,9 +48,34 @@ async function signupUser(params){
     }
 }
 
+//Send Feedback Function 
+async function feedbackUser(params){
+    console.log("InsideFeedBackFunction");
+    console.log("FeedBackFunctionJson",JSON.stringify(params));
+    console.log("FeedBackFunctionJson",params);
+    try{
+        let response=await fetch(apiFeedbackUser,{
+            method:'POST',
+            headers:{
+                'Accept':'application/json',
+                'Content-Type':'application/json',
+            },
+            body:JSON.stringify(params)
+        });
+        let responseJson=await response.json();
+        console.log("FeedbackFormResponse",responseJson);
+        return responseJson;
+    }catch(error){
+        console.log(`Error is : ${error}`);
+    }
+    
+}
+
 
 export {loginUser};
 export{signupUser};
+export{feedbackUser};
+
 
 //*************Common Function ***************//
 //Navigate to Next Screen

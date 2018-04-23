@@ -27,6 +27,7 @@ import { Container, content, Header, Body, Icon, Content, } from 'native-base'
 //npm install react-native-image-picker@latest --save
 //npm install react-native-image-base64
 // npm install native-base --save
+//npm i react-native-splash-screen --save
 
 
 
@@ -36,10 +37,11 @@ import  Home  from './nearme/HomeScreen/Home.js'
 import  { StackNavigator } from 'react-navigation'
 import  DetialScreen  from './nearme/ListDetailScreen/DetailScreen.js'
 import  Listing  from './nearme/ListingScreen/Listing.js'
+import Login from './nearme/login/Login.js';
+import Signup from './nearme/signup/Signup.js';
+import Feedback from './nearme/FeedbackScreen/Feedback.js';
 
-import Login from './nearme/login/Login.js'
-import Signup from './nearme/signup/Signup.js'
-import Feedback from './nearme/FeedbackScreen/Feedback.js'
+import SplashScreen from 'react-native-splash-screen';
 
 const AppNavigtor = StackNavigator({
 
@@ -57,6 +59,9 @@ const AppNavigtor = StackNavigator({
 )
 
 export default class App extends Component {
+  componentDidMount(){
+    SplashScreen.hide();
+  }
   render() {
     return (
       <AppNavigtor />
@@ -64,6 +69,11 @@ export default class App extends Component {
     );
   }
 }
-
-
-
+//KeysotePassword :- NearBy
+//First and Last name :- NearBy
+//What is the name of your organizational unit? :-NearBy
+//What is the name of your organization? :- NearBy
+//What is the name of your City or Locality?:-Mohali
+//What is the name of your State or Province? :- Punjab
+//What is the two-letter country code for this unit?:-91
+//Enter key password for <my-key-alias>(RETURN if same as keystore password): NearBy

@@ -41,7 +41,7 @@ export default class Listing extends Component {
     constructor(props) {
         super(props);
 
-        console.log("LifeCycle","constructor");
+        console.log("LifeCycle", "constructor");
         console.log("TextFromScreen", this.props.navigation.state.params.placeSearch);
         this.state = ({
             searchName: this.props.navigation.state.params.placeSearch,
@@ -63,19 +63,20 @@ export default class Listing extends Component {
             props.navigation.navigate("MyApp");
             return true;
         });
-       
+
     }
-    
-   
+
+
 
     componentDidMount() {
-        console.log("LifeCycle","componentDidMount");
-            if (this.state.searchName != null) {
+        console.log("LifeCycle", "componentDidMount");
+        if (this.state.searchName != null) {
             console.log("insidSearchName");
             this.fetchData();
         } else {
             Alert.alert("nullData");
         }
+        
 
     }
 
@@ -103,7 +104,7 @@ export default class Listing extends Component {
                     'Message',
                     'No Result Found',
                     [
-                        {text:'Ok',onPress:()=>this.props.navigation.navigate("MyApp")}  
+                        { text: 'Ok', onPress: () => this.props.navigation.navigate("MyApp") }
                     ]
                 );
 
@@ -117,7 +118,7 @@ export default class Listing extends Component {
                     'Message',
                     'Exceed API Daily Limits',
                     [
-                        {text:'Ok',onPress:()=>this.props.navigation.navigate("MyApp")}  
+                        { text: 'Ok', onPress: () => this.props.navigation.navigate("MyApp") }
                     ]
                 );
 
@@ -132,7 +133,7 @@ export default class Listing extends Component {
         //console.log("LocationDestination","ddd"+this.state.allPlacesGoogle.geometry.location.lng);
     }
     render() {
-        console.log("LifeCycle","render");
+        console.log("LifeCycle", "render");
         const { navigate } = this.props.navigation;
         const { params } = this.props.navigation.state;
         return (
@@ -196,16 +197,16 @@ export default class Listing extends Component {
                                 destinationLat: item.geometry.location.lat,
                                 destinationLng: item.geometry.location.lng,
                             })
-                            let iteStr=JSON.stringify(item);
-                            if(iteStr.includes('rating')){
+                            let iteStr = JSON.stringify(item);
+                            if (iteStr.includes('rating')) {
                                 console.log("insidee");
                                 this.setState({
-                                    ratingVisblity:true,
+                                    ratingVisblity: true,
                                 })
-                            }else{
+                            } else {
                                 console.log("outsidee");
                                 this.setState({
-                                    ratingVisblity:false,
+                                    ratingVisblity: false,
                                 })
                             }
                             //Invisible start rating when no rating available
@@ -231,7 +232,6 @@ export default class Listing extends Component {
                                     flexDirection: 'row',
                                     backgroundColor: 'white'
                                 }}>
-
                                     <Image
                                         source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + this.photRefrence + '&key=AIzaSyBq2vZw0vfoiTSm2DypMQ6-odWpsJYLCEc' }}
                                         style={{ width: 120, height: 120, margin: 5 }}></Image>
@@ -243,8 +243,8 @@ export default class Listing extends Component {
                                         marginLeft: 5,
                                     }}>
                                         <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
-                                        
-                                       <View style={{ flexDirection: 'row', marginLeft: 2 }}>
+
+                                        <View style={{ flexDirection: 'row', marginLeft: 2 }}>
                                             <Text style={styles.rating}>{item.rating}</Text>
 
                                             <Stars
@@ -348,3 +348,4 @@ const styles = StyleSheet.create({
 //         return null;
 //     }
 // }
+

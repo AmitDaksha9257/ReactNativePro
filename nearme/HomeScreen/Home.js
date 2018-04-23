@@ -11,17 +11,25 @@ import Button from 'react-native-button';
 import { learnColour } from '../../asset/left-menu.png';
 import { NavigationActions } from 'react-navigation';
 
+import SplashScreen from 'react-native-splash-screen';
+
 let screenWidth = Dimensions.get('window').width;
 
 export default class Home extends Component {
     //Navigate to Next Screen
     navigateToScreen(name) {
         console.log("InSideNvigate");
+        if(this.state.lat_lng!=null){
+
+        
         const navigateAction = NavigationActions.navigate({
             routeName: name,
             params: { placeSearch: this.state.typedText, LatLng: this.state.lat_lng }
         });
         this.props.navigation.dispatch(navigateAction);
+    }else{
+        ToastAndroid.show('Your Loacation not found.',ToastAndroid.SHORT);
+    }
     }
 
     //Detect Back press 
@@ -50,7 +58,7 @@ export default class Home extends Component {
 
    
     componentDidMount() {
-
+        SplashScreen.hide();
 
         this.getLocationPermissions();
     }
@@ -59,6 +67,7 @@ export default class Home extends Component {
     async getLocationPermissions() {
         console.log("getLocationPermission" + "iddidd");
         const chckLocationPermission = PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+        
         if (chckLocationPermission === PermissionsAndroid.RESULTS.GRANTED) {
             this.getCurrentLoc();
         } else {
@@ -103,6 +112,7 @@ export default class Home extends Component {
     //Check Input Text for empty or not
     CheckTextInputIsEmptyOrNot() {
         if (this.state.typedText != '') {
+           
             this.navigateToScreen('Listing');
         } else {
             ToastAndroid.show('Please enter text first', ToastAndroid.SHORT);
@@ -121,9 +131,9 @@ export default class Home extends Component {
                     <StatusBar backgroundColor='#03004e' />
 
                     <View style={{ backgroundColor: '#3B227B', height: 50, alignItems: 'center', flexDirection: 'row' }}>
-                        <TouchableOpacity onPress={() => this.props.navigation.navigate("DrawerOpen")}>
+                        <TouchableOpacity style={{width:40}} onPress={() => this.props.navigation.navigate("DrawerOpen")}>
                             <Image source={require('../../asset/left-menu.png')}
-                                style={{ height: 20, width: 20, marginLeft: 12, padding: 10 }}
+                                style={{ height: 20, width: 20, marginLeft: 12, padding: 10,}}
                             ></Image>
                         </TouchableOpacity>
                         <Text

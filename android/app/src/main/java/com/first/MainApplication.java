@@ -6,6 +6,7 @@ import com.facebook.CallbackManager;
 import com.facebook.appevents.AppEventsLogger;
 
 import com.facebook.react.ReactApplication;
+import org.devio.rn.splashscreen.SplashScreenReactPackage;
 import com.imagepicker.ImagePickerPackage;
 import com.facebook.reactnative.androidsdk.FBSDKPackage;
 import com.facebook.react.ReactNativeHost;
@@ -34,8 +35,9 @@ public class MainApplication extends Application implements ReactApplication {
     @Override
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
-          new MainReactPackage(),
-             new ImagePickerPackage(),
+              new MainReactPackage(),
+            new SplashScreenReactPackage(),
+              new ImagePickerPackage(),
               new FBSDKPackage(mCallbackManager)
       );
     }
@@ -54,7 +56,7 @@ public class MainApplication extends Application implements ReactApplication {
   @Override
   public void onCreate() {
     super.onCreate();
-      FacebookSdk.sdkInitialize(getApplicationContext());
+    FacebookSdk.sdkInitialize(getApplicationContext());
     SoLoader.init(this, /* native exopackage */ false);
   }
 
