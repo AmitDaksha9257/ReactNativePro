@@ -74,7 +74,7 @@ class SideMenu extends Component {
             <Text style={{ fontSize: 14, marginLeft: 10, color: 'white', fontStyle: 'normal' }}>Home</Text>
           </View>
         </TouchableWithoutFeedback >
-
+        {/* Help Page */}
         <View style={{ height: 50, flexDirection: 'row', alignItems: 'center' }}>
           <Image style={{ height: 25, width: 25, marginLeft: 15 }}
             source={require('../../asset/help-icon.png')}></Image>

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {
     Platform, StyleSheet, Text, View, AppRegistry, ScrollView,
     Image, TextInput, Button, TouchableOpacity, StatusBar,
-    Alert, ToastAndroid, ImageStore, ActivityIndicator
+    Alert, ToastAndroid, ImageStore, ActivityIndicator,BackHandler
 } from 'react-native';
 
 import ImagePicker from 'react-native-image-picker';
@@ -21,6 +21,12 @@ export default class Feedback extends Component {
             message: null,
             loading: false,
         }
+        //Back Press
+        BackHandler.addEventListener('hardwareBackPress', function () {
+            // Alert.alert("Bacl");
+             props.navigation.navigate("Home");
+            return true;
+        });
     }
 
     //Slecting image from gallery or take photo func
@@ -142,13 +148,14 @@ export default class Feedback extends Component {
                         textStyle={{ color: '#03004e' }}
                         cancelable={false} />
                     <View style={{ backgroundColor: '#3B227B', height: 50, alignItems: 'center', flexDirection: 'row' }}>
-                        <TouchableOpacity onPress={() => this.props.navigation.navigate("DrawerOpen")}>
+                        <TouchableOpacity style={{ width: 60,height:50,justifyContent:'center' }} 
+                        onPress={() => this.props.navigation.navigate("DrawerOpen")}>
                             <Image source={require('../../asset/left-menu.png')}
                                 style={{ height: 20, width: 20, marginLeft: 12, padding: 10 }}
                             ></Image>
                         </TouchableOpacity>
                         <Text
-                            style={{ color: 'white', fontSize: 20, marginLeft: 15, fontWeight: 'bold' }}>Feedback</Text>
+                            style={{ color: 'white', fontSize: 20, marginLeft: 0, fontWeight: 'bold' }}>Feedback</Text>
                     </View>
                     <View style={{ flexDirection: 'column', margin: 20, }}>
                         <TextInput

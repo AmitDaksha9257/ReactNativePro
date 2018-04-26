@@ -59,9 +59,7 @@ const AppNavigtor = StackNavigator({
 )
 
 export default class App extends Component {
-  componentDidMount(){
-    SplashScreen.hide();
-  }
+ 
   render() {
     return (
       <AppNavigtor />

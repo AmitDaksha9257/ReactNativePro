@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 import {
     View, Text, Image, StyleSheet, FlatList, ScrollView, TouchableOpacity, Alert,
-    TouchableHighlight, ActivityIndicator, BackHandler
+    TouchableHighlight, ActivityIndicator, BackHandler, Animated, TextInput, Dimensions
 } from 'react-native';
 import Button from 'react-native-button';
 import Stars from 'react-native-stars';
@@ -13,15 +13,74 @@ import getDirections from 'react-native-google-maps-directions';
 
 import Spinner from 'react-native-loading-spinner-overlay';
 
+let screenWidth = Dimensions.get('window').width;
 export default class Listing extends Component {
 
+    constructor(props) {
+        super(props);
+
+        console.log("LifeCycle", "constructor");
+        console.log("TextFromScreen", this.props.navigation.state.params.placeSearch);
+        this.state = {
+            searchName: this.props.navigation.state.params.placeSearch,
+            lat_lng: this.props.navigation.state.params.LatLng,
+            allPlacesGoogle: [],
+            photoRef: [],
+            placeId: null,
+            visible: true,
+            text: "Loading...",
+            ratingVisblity: false,
+            yPositionAni: new Animated.Value(0),
+            opecity: new Animated.Value(0),
+            serachText: null,
+        }
+        console.log("DataFromScreen", this.state.searchName);
+        console.log("DataFromScreen", this.state.lat_lng);
+
+        //Handle Backpress here
+        BackHandler.addEventListener('hardwareBackPress', function () {
+            props.navigation.navigate("MyApp");
+            return true;
+        });
+
+    }
+
+    componentDidMount() {
+        console.log("LifeCycle", "componentDidMount");
+        if (this.state.searchName != null) {
+            console.log("insidSearchName");
+            this.fetchData(this.state.searchName);
+        } else {
+            Alert.alert("nullData");
+        }
+
+
+    }
+    //Populate page Again wend user search 
+    navigateToScreen(name) {
+        console.log("InSideNvigate");
+        console.log("CurrentLat", this.state.lat_lng);
+
+        if (this.state.lat_lng != null) {
+
+
+            const navigateAction = NavigationActions.navigate({
+                routeName: name,
+                params: { placeSearch: this.state.serachText, LatLng: this.state.lat_lng }
+            });
+            this.props.navigation.dispatch(navigateAction);
+        } else {
+            ToastAndroid.show('Your Loacation not found.', ToastAndroid.SHORT);
+        }
+    }
     //Open GogleMap App whit source and destination 
-    handleGetDirections = () => {
+    handleGetDirections = (lat1, lng1) => {
+
         const data = {
 
             destination: {
-                latitude: this.state.destinationLat,
-                longitude: this.state.destinationLng
+                latitude: lat1,
+                longitude: lng1
             },
             params: [
                 {
@@ -38,53 +97,47 @@ export default class Listing extends Component {
         getDirections(data)
     }
 
-    constructor(props) {
-        super(props);
 
-        console.log("LifeCycle", "constructor");
-        console.log("TextFromScreen", this.props.navigation.state.params.placeSearch);
-        this.state = ({
-            searchName: this.props.navigation.state.params.placeSearch,
-            lat_lng: this.props.navigation.state.params.LatLng,
-            allPlacesGoogle: [],
-            photoRef: [],
-            placeId: null,
-            destinationLat: null,
-            destinationLng: null,
-            visible: true,
-            text: "Loading...",
-            ratingVisblity: false,
-        });
-        console.log("DataFromScreen", this.state.searchName);
-        console.log("DataFromScreen", this.state.lat_lng);
-
-        //Handle Backpress here
-        BackHandler.addEventListener('hardwareBackPress', function () {
-            props.navigation.navigate("MyApp");
-            return true;
-        });
+    //Sercbox open
+    _onSearchPressed() {
+        Animated.parallel([
+            Animated.timing(this.state.yPositionAni, {
+                toValue: 68,
+                duration: 500
+            }),
+            Animated.timing(this.state.opecity, {
+                toValue: 1,
+                duration: 500
+            })
+        ]).start();
+    }
+    //Searchbox close
+    crossButtonClick() {
+        Animated.parallel([
+            Animated.timing(this.state.yPositionAni, {
+                toValue: -168,
+                duration: 500
+            }),
+            Animated.timing(this.state.opecity, {
+                toValue: 1,
+                duration: 500
+            })
+        ]).start();
+    }
+    //After SerachGo Click 
+    searchGoClick() {
+        console.log("SearchGoButtonClick");
+        //Check react native You tube tutorial Nguyen Duc Hoang
+        this.navigateToScreen('Listing');
 
     }
+    //Get List data according to text
+    fetchData = async (textSerch) => {
 
-
-
-    componentDidMount() {
-        console.log("LifeCycle", "componentDidMount");
-        if (this.state.searchName != null) {
-            console.log("insidSearchName");
-            this.fetchData();
-        } else {
-            Alert.alert("nullData");
-        }
-        
-
-    }
-
-    fetchData = async () => {
-        console.log("FetchData");
+        console.log("FetchData", textSerch);
         console.log("LatitudeLongitude", this.state.lat_lng);
         try {
-            const response = await fetch("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + this.state.lat_lng + "&radius=5000&keyword=" + this.state.searchName + "&key=AIzaSyBq2vZw0vfoiTSm2DypMQ6-odWpsJYLCEc");
+            const response = await fetch("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + this.state.lat_lng + "&rankby=distance&keyword=" + textSerch + "&key=AIzaSyBq2vZw0vfoiTSm2DypMQ6-odWpsJYLCEc");
             const json = await response.json();
             console.log("API_STATUS", json.status);
             if (json.status == "OK") {
@@ -125,7 +178,7 @@ export default class Listing extends Component {
 
             }
         } catch (error) {
-            console.error("ErrorAPI ", error);
+            //  console.error("ErrorAPI ", error);
 
         }
     }
@@ -133,9 +186,12 @@ export default class Listing extends Component {
         //console.log("LocationDestination","ddd"+this.state.allPlacesGoogle.geometry.location.lng);
     }
     render() {
-        console.log("LifeCycle", "render");
+        // console.log("LifeCycle", "render");
         const { navigate } = this.props.navigation;
         const { params } = this.props.navigation.state;
+        let animationStylee = {
+            transform: [{ translateY: this.state.yPositionAni }]
+        }
         return (
 
             <View style={{ flex: 1, flexDirection: 'column', }}>
@@ -146,22 +202,55 @@ export default class Listing extends Component {
 
                 {this.state.navigationBarVisiblity ? <View style={{
                     backgroundColor: '#3B227B', height: 50, alignItems: 'center',
-                    justifyContent: 'space-between', flexDirection: 'row'
+                    justifyContent: 'space-between', flexDirection: 'row',
                 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', }}>
-                        <TouchableOpacity onPress={() => this.props.navigation.navigate("MyApp")}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                        <TouchableOpacity style={{ width:50,justifyContent: 'center', marginLeft: 12 }}
+                            onPress={() => this.props.navigation.navigate("MyApp")}>
                             <Image source={require('../../asset/back-icon.png')}
-                                style={{ height: 18, width: 18, marginLeft: 12, padding: 0, margin: 10, }}
+                                style={{ height: 18, width: 18, padding: 10, }}
                             ></Image>
 
                         </TouchableOpacity>
                         <Text
-                            style={{ color: 'white', fontSize: 20, marginLeft: 15, fontWeight: 'bold' }}>Listing</Text>
+                            style={{ color: 'white', fontSize: 20, marginLeft: 0, fontWeight: 'bold' }}>Listing</Text>
                     </View>
-                    <View style={{ marginRight: 10, }}>
-                        {/* <Image source={require('../../asset/serach-icon.png')}
-                            style={{ height: 20, width: 20 }}></Image> */}
-                    </View>
+                    <TouchableOpacity style={{ marginRight: 10, }} onPress={this._onSearchPressed.bind(this)}>
+                        <View style={{ marginRight: 10, }}>
+                            <Image source={require('../../asset/serach-icon.png')}
+                                style={{ height: 20, width: 20,padding:10, }}></Image>
+                        </View>
+                    </TouchableOpacity>
+
+                    {/* SearchBox Implement */}
+                    <Animated.View style={[styles.searchBarStyle, animationStylee]}>
+                        <View style={{ flexDirection: 'row', width: screenWidth, justifyContent: 'center' }}>
+                            <TouchableOpacity style={{ justifyContent: 'center', marginLeft: 7 }}
+                                onPress={this.crossButtonClick.bind(this)}>
+                                <Image source={require('../../asset/delete.png')}
+                                    style={{ height: 15, width: 15, margin: 10, }} />
+
+                            </TouchableOpacity>
+                            <TextInput placeholder="Search."
+                                underlineColorAndroid="transparent"
+                                style={{
+                                    height: 40,
+                                    flex: 1,
+                                    width: screenWidth,
+                                    padding: 10,
+                                    fontSize: 15,
+                                    color: 'black',
+                                }}
+                                onChangeText={(text) => this.setState({ serachText: text })}
+                            />
+                            <TouchableOpacity style={{ position: 'absolute', right: 5, justifyContent: 'center' }}
+                                onPress={this.searchGoClick.bind(this)}>
+                                <Image source={require('../../asset/search_box.png')}
+                                    style={{ height: 15, width: 15, margin: 10, }} />
+
+                            </TouchableOpacity>
+                        </View>
+                    </Animated.View>
                 </View> : null}
                 {/* Showing My Current Location tab */}
                 {/* <View style={{
@@ -185,38 +274,16 @@ export default class Listing extends Component {
                 <FlatList
                     data={this.state.allPlacesGoogle}
                     renderItem={({ item, index }) => {
+                        // console.log('FlatListRenderMEthod')
                         var value = item.photos;
                         let photRefrence;
+
                         try {
                             var articles = item.photos.map((item, index) => {
                                 this.photRefrence = item.photo_reference;
                             });
-
-                            //Setting Destinatination lat and lng for google map app
-                            this.setState({
-                                destinationLat: item.geometry.location.lat,
-                                destinationLng: item.geometry.location.lng,
-                            })
-                            let iteStr = JSON.stringify(item);
-                            if (iteStr.includes('rating')) {
-                                console.log("insidee");
-                                this.setState({
-                                    ratingVisblity: true,
-                                })
-                            } else {
-                                console.log("outsidee");
-                                this.setState({
-                                    ratingVisblity: false,
-                                })
-                            }
-                            //Invisible start rating when no rating available
-                            // if(item.find('rating')){
-                            //     console.log('RatingAvailable');
-                            // }else{
-                            //     console.log('Rating Not available');
-                            // }
                         } catch (error) {
-                            console.log("ErrorMsg", error.message);
+                            //console.log("ErrorMsg", error.message);
                         }
 
 
@@ -286,7 +353,8 @@ export default class Listing extends Component {
                                                 borderColor: '#4a148c',
                                                 padding: 5,
                                                 marginLeft: 10,
-                                            }} onPress={() => this.handleGetDirections()}>Get Direction</Button>
+                                            }} onPress={() => this.handleGetDirections(item.geometry.location.lat, item.geometry.location.lng)}>Get Direction</Button>
+                                            
                                         </View>
                                     </View>
 
@@ -302,10 +370,6 @@ export default class Listing extends Component {
                     }
                     }
                     keyExtractor={(item, index) => item.name}
-                    keyExtractor={(item, index) => item.rating}
-                    keyExtractor={(item, index) => item.vicinity}
-                    keyExtractor={(item, index) => item.photos}
-                    keyExtractor={(item, index) => this.photRefrence}
 
                 ></FlatList>
 
@@ -338,6 +402,17 @@ const styles = StyleSheet.create({
     },
     myEmptyStarStyle: {
         color: 'white',
+    },
+    searchBarStyle: {
+        flex: 1,
+        flexDirection: 'row',
+        position: 'absolute',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: '#00bfa5',
+        bottom: 70,
+        width: screenWidth
     }
 
 });

@@ -5,7 +5,7 @@ import {
     View, Text, Image, StyleSheet,
     TextInput, Dimensions, ScrollView,
     TouchableHighlight, Platform, TouchableOpacity, Alert, PermissionsAndroid, StatusBar,
-    ToastAndroid, BackHandler
+    ToastAndroid, BackHandler, Animated
 } from 'react-native';
 import Button from 'react-native-button';
 import { learnColour } from '../../asset/left-menu.png';
@@ -19,17 +19,19 @@ export default class Home extends Component {
     //Navigate to Next Screen
     navigateToScreen(name) {
         console.log("InSideNvigate");
-        if(this.state.lat_lng!=null){
+        console.log("CurrentLat", this.state.lat_lng);
 
-        
-        const navigateAction = NavigationActions.navigate({
-            routeName: name,
-            params: { placeSearch: this.state.typedText, LatLng: this.state.lat_lng }
-        });
-        this.props.navigation.dispatch(navigateAction);
-    }else{
-        ToastAndroid.show('Your Loacation not found.',ToastAndroid.SHORT);
-    }
+        if (this.state.lat_lng != null) {
+
+
+            const navigateAction = NavigationActions.navigate({
+                routeName: name,
+                params: { placeSearch: this.state.typedText, LatLng: this.state.lat_lng }
+            });
+            this.props.navigation.dispatch(navigateAction);
+        } else {
+            ToastAndroid.show('Your Loacation not found.', ToastAndroid.SHORT);
+        }
     }
 
     //Detect Back press 
@@ -45,8 +47,11 @@ export default class Home extends Component {
             error: null,
             inputText: '',
             lat_lng: null,
+            yPosition: new Animated.Value(0),
+            opecity: new Animated.Value(0),
         };
-       
+        this._onSearchPressed = this._onSearchPressed.bind(this);
+        this.crossButtonClick = this.crossButtonClick.bind(this);
         //Handle BackPress
         BackHandler.addEventListener('hardwareBackPress', function () {
             // Alert.alert("Bacl");
@@ -56,10 +61,11 @@ export default class Home extends Component {
 
     }
 
-   
     componentDidMount() {
+        //HideSplas Screen After Launchig Home screen
         SplashScreen.hide();
 
+        //Ask For Permission When Open App
         this.getLocationPermissions();
     }
 
@@ -67,7 +73,7 @@ export default class Home extends Component {
     async getLocationPermissions() {
         console.log("getLocationPermission" + "iddidd");
         const chckLocationPermission = PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
-        
+
         if (chckLocationPermission === PermissionsAndroid.RESULTS.GRANTED) {
             this.getCurrentLoc();
         } else {
@@ -111,8 +117,9 @@ export default class Home extends Component {
 
     //Check Input Text for empty or not
     CheckTextInputIsEmptyOrNot() {
+        console.log("CurrentLat", this.state.lat_lng);
         if (this.state.typedText != '') {
-           
+
             this.navigateToScreen('Listing');
         } else {
             ToastAndroid.show('Please enter text first', ToastAndroid.SHORT);
@@ -121,25 +128,95 @@ export default class Home extends Component {
         }
 
     }
+    //Sercbox open
+    _onSearchPressed() {
+        Animated.parallel([
+            Animated.timing(this.state.yPosition, {
+                toValue: 68,
+                duration: 500
+            }),
+            Animated.timing(this.state.opecity, {
+                toValue: 1,
+                duration: 500
+            })
+        ]).start();
+    }
+    //Searchbox close
+    crossButtonClick() {
+        Animated.parallel([
+            Animated.timing(this.state.yPosition, {
+                toValue: -168,
+                duration: 500
+            }),
+            Animated.timing(this.state.opecity, {
+                toValue: 1,
+                duration: 500
+            })
+        ]).start();
+    }
+    
     render() {
         const { navigate } = this.props.navigation;
         const { params } = this.props.navigation.state;
+        //Animation Style
+        let animationStylee = {
+            transform: [{ translateY: this.state.yPosition }]
+        }
         return (
             <ScrollView>
                 <View style={styles.container}>
 
                     <StatusBar backgroundColor='#03004e' />
 
-                    <View style={{ backgroundColor: '#3B227B', height: 50, alignItems: 'center', flexDirection: 'row' }}>
-                        <TouchableOpacity style={{width:40}} onPress={() => this.props.navigation.navigate("DrawerOpen")}>
-                            <Image source={require('../../asset/left-menu.png')}
-                                style={{ height: 20, width: 20, marginLeft: 12, padding: 10,}}
-                            ></Image>
+                    <View style={{ backgroundColor: '#3B227B', height: 50, alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                            <TouchableOpacity style={{ width: 60,height:50,justifyContent:'center' }} onPress={() => this.props.navigation.navigate("DrawerOpen")}>
+                                <Image source={require('../../asset/left-menu.png')}
+                                    style={{ height: 20, width: 20, marginLeft: 12, padding: 10, }}
+                                ></Image>
+                            </TouchableOpacity>
+                            <Text
+                                style={{ color: 'white', fontSize: 20, marginLeft: 0, fontWeight: 'bold' }}>Home
+                            </Text>
+                        </View>
+                        <TouchableOpacity style={{ marginRight: 10, }} onPress={this._onSearchPressed}>
+                            <View style={{ marginRight: 10, }}>
+                                <Image source={require('../../asset/serach-icon.png')}
+                                    style={{ height: 20, width: 20 }}></Image>
+                            </View>
                         </TouchableOpacity>
-                        <Text
-                            style={{ color: 'white', fontSize: 20, marginLeft: 15, fontWeight: 'bold' }}>Home</Text>
+                        {/* SearchBox Implement */}
+                        <Animated.View style={[styles.searchBarStyle, animationStylee]}>
+                        <View style={{flexDirection:'row',width:screenWidth,justifyContent:'center'}}>
+                           <TouchableOpacity style={{justifyContent:'center',marginLeft:7 }}
+                                onPress={this.crossButtonClick}>
+                                <Image source={require('../../asset/delete.png')}
+                                    style={{ height: 15, width: 15,margin: 10, }}
+                                    onPress={this.crossButtonClick} />
+
+                            </TouchableOpacity>
+                            <TextInput placeholder="Search."
+                                underlineColorAndroid="transparent"
+                                style={{
+                                    height: 40,
+                                    flex: 1,
+                                    width: screenWidth,
+                                    padding: 10,
+                                    fontSize: 15,
+                                    color: 'black',
+                                }}
+                            />
+                            <TouchableOpacity style={{position: 'absolute',right:5 ,justifyContent:'center' }}
+                                onPress={this.crossButtonClick.bind(this)}>
+                                <Image source={require('../../asset/search_box.png')}
+                                    style={{ height: 15, width: 15, margin: 10, }}
+                                    onPress={this.crossButtonClick.bind(this)} />
+
+                            </TouchableOpacity>
+                            </View>
+                        </Animated.View>
                     </View>
-                    
+
                     <View style={{ flexDirection: 'column', alignItems: 'center', marginTop: 25, marginBottom: 10, }}>
                         <Image source={require('../../asset/logo-img.png')}></Image>
                         <Image source={require('../../asset/logo-text.png')}></Image>
@@ -183,7 +260,6 @@ export default class Home extends Component {
 
 
 
-
 const styles = StyleSheet.create({
 
     container: {
@@ -215,5 +291,16 @@ const styles = StyleSheet.create({
         marginLeft: 30,
         marginRight: 30,
     },
+    searchBarStyle: {
+        flex: 1,
+        flexDirection: 'row',
+        position: 'absolute',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: '#00bfa5',
+        bottom: 70,
+        width:screenWidth,
+    }
 
 });
