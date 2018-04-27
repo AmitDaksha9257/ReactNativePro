@@ -10,17 +10,16 @@ import Stars from 'react-native-stars';
 import { NavigationActions } from 'react-navigation';
 import ListingScreen from './Listing'
 import getDirections from 'react-native-google-maps-directions';
-
 import Spinner from 'react-native-loading-spinner-overlay';
 
+import { getAllPlaces } from '../../ServerApi/Server.js'
+
 let screenWidth = Dimensions.get('window').width;
+
 export default class Listing extends Component {
 
     constructor(props) {
         super(props);
-
-        console.log("LifeCycle", "constructor");
-        console.log("TextFromScreen", this.props.navigation.state.params.placeSearch);
         this.state = {
             searchName: this.props.navigation.state.params.placeSearch,
             lat_lng: this.props.navigation.state.params.LatLng,
@@ -34,9 +33,6 @@ export default class Listing extends Component {
             opecity: new Animated.Value(0),
             serachText: null,
         }
-        console.log("DataFromScreen", this.state.searchName);
-        console.log("DataFromScreen", this.state.lat_lng);
-
         //Handle Backpress here
         BackHandler.addEventListener('hardwareBackPress', function () {
             props.navigation.navigate("MyApp");
@@ -46,17 +42,55 @@ export default class Listing extends Component {
     }
 
     componentDidMount() {
-        console.log("LifeCycle", "componentDidMount");
         if (this.state.searchName != null) {
-            console.log("insidSearchName");
-            this.fetchData(this.state.searchName);
+            this.getAllNearByPlaces();
         } else {
             Alert.alert("nullData");
         }
-
-
     }
-    //Populate page Again wend user search 
+    //Get Nearby Places
+    getAllNearByPlaces() {
+        const urlParams = {
+                    searchText: this.state.searchName,
+                    lat_lng: this.state.lat_lng,
+                 };
+        getAllPlaces(urlParams).then((result) => {
+            console.log("Status from server",result.status)
+            if (result.status == "OK") {
+                this.setState({
+                    allPlacesGoogle: result.results,
+                    visible: !this.state.visible,
+                    navigationBarVisiblity: true,
+                });
+
+            } else if (result.status == "ZERO_RESULTS") {
+                this.setState({
+                    visible: !this.state.visible,
+                    text: "No Result Found"
+                });
+                this.alertMsg('No Result Found');
+            
+
+            } else {
+                this.setState({
+                    visible: !this.state.visible,
+                    text: "Exceed API Daily Limits"
+                });
+                this.alertMsg('Exceed API Daily Limits');
+            }
+        });
+    }
+
+    alertMsg(message){
+        Alert.alert(
+            'Message',
+            message,
+            [
+                { text: 'Ok', onPress: () => this.props.navigation.navigate("MyApp") }
+            ]
+        );
+    }
+    //Go to next page
     navigateToScreen(name) {
         console.log("InSideNvigate");
         console.log("CurrentLat", this.state.lat_lng);
@@ -75,7 +109,6 @@ export default class Listing extends Component {
     }
     //Open GogleMap App whit source and destination 
     handleGetDirections = (lat1, lng1) => {
-
         const data = {
 
             destination: {
@@ -112,7 +145,7 @@ export default class Listing extends Component {
         ]).start();
     }
     //Searchbox close
-    crossButtonClick() {
+    crossSearchButtonClick() {
         Animated.parallel([
             Animated.timing(this.state.yPositionAni, {
                 toValue: -168,
@@ -126,67 +159,10 @@ export default class Listing extends Component {
     }
     //After SerachGo Click 
     searchGoClick() {
-        console.log("SearchGoButtonClick");
-        //Check react native You tube tutorial Nguyen Duc Hoang
         this.navigateToScreen('Listing');
-
     }
-    //Get List data according to text
-    fetchData = async (textSerch) => {
-
-        console.log("FetchData", textSerch);
-        console.log("LatitudeLongitude", this.state.lat_lng);
-        try {
-            const response = await fetch("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + this.state.lat_lng + "&rankby=distance&keyword=" + textSerch + "&key=AIzaSyBq2vZw0vfoiTSm2DypMQ6-odWpsJYLCEc");
-            const json = await response.json();
-            console.log("API_STATUS", json.status);
-            if (json.status == "OK") {
-                this.setState({
-                    allPlacesGoogle: json.results,
-                    visible: !this.state.visible,
-                    navigationBarVisiblity: true,
-                });
-
-            } else if (json.status == "ZERO_RESULTS") {
-                this.setState({
-                    visible: !this.state.visible,
-                    text: "No Result Found"
-                });
-
-                Alert.alert(
-                    'Message',
-                    'No Result Found',
-                    [
-                        { text: 'Ok', onPress: () => this.props.navigation.navigate("MyApp") }
-                    ]
-                );
-
-            } else {
-                this.setState({
-                    visible: !this.state.visible,
-                    text: "Exceed API Daily Limits"
-                });
-
-                Alert.alert(
-                    'Message',
-                    'Exceed API Daily Limits',
-                    [
-                        { text: 'Ok', onPress: () => this.props.navigation.navigate("MyApp") }
-                    ]
-                );
-
-
-            }
-        } catch (error) {
-            //  console.error("ErrorAPI ", error);
-
-        }
-    }
-    fetchImages() {
-        //console.log("LocationDestination","ddd"+this.state.allPlacesGoogle.geometry.location.lng);
-    }
+    
     render() {
-        // console.log("LifeCycle", "render");
         const { navigate } = this.props.navigation;
         const { params } = this.props.navigation.state;
         let animationStylee = {
@@ -205,8 +181,8 @@ export default class Listing extends Component {
                     justifyContent: 'space-between', flexDirection: 'row',
                 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                        <TouchableOpacity style={{ width:50,justifyContent: 'center', marginLeft: 12 }}
-                            onPress={() => this.props.navigation.navigate("MyApp")}>
+                        <TouchableOpacity style={{ width: 50, justifyContent: 'center', marginLeft: 12 }}
+                            onPress={() => this.navigateToScreen('MyApp')}>
                             <Image source={require('../../asset/back-icon.png')}
                                 style={{ height: 18, width: 18, padding: 10, }}
                             ></Image>
@@ -218,7 +194,7 @@ export default class Listing extends Component {
                     <TouchableOpacity style={{ marginRight: 10, }} onPress={this._onSearchPressed.bind(this)}>
                         <View style={{ marginRight: 10, }}>
                             <Image source={require('../../asset/serach-icon.png')}
-                                style={{ height: 20, width: 20,padding:10, }}></Image>
+                                style={{ height: 20, width: 20, padding: 10, }}></Image>
                         </View>
                     </TouchableOpacity>
 
@@ -226,7 +202,7 @@ export default class Listing extends Component {
                     <Animated.View style={[styles.searchBarStyle, animationStylee]}>
                         <View style={{ flexDirection: 'row', width: screenWidth, justifyContent: 'center' }}>
                             <TouchableOpacity style={{ justifyContent: 'center', marginLeft: 7 }}
-                                onPress={this.crossButtonClick.bind(this)}>
+                                onPress={this.crossSearchButtonClick.bind(this)}>
                                 <Image source={require('../../asset/delete.png')}
                                     style={{ height: 15, width: 15, margin: 10, }} />
 
@@ -354,7 +330,7 @@ export default class Listing extends Component {
                                                 padding: 5,
                                                 marginLeft: 10,
                                             }} onPress={() => this.handleGetDirections(item.geometry.location.lat, item.geometry.location.lng)}>Get Direction</Button>
-                                            
+
                                         </View>
                                     </View>
 

@@ -2,9 +2,11 @@
 import React, { Component } from 'react';
 import { NavigationActions } from 'react-navigation';
 
+const googleApiKey='AIzaSyBq2vZw0vfoiTSm2DypMQ6-odWpsJYLCEc'
 const apiLoginUser='http://182.74.91.253/F-J/in_house/api/login';
 const apiSignUpUser='http://182.74.91.253/F-J/in_house/api/signup';
 const apiFeedbackUser='http://182.74.91.253/F-J/in_house/api/sendFeedback';
+const apiGoogleFindPlaces='https://maps.googleapis.com/maps/api/place/nearbysearch/json?location='
 
 //LoginUser
 async function loginUser(params) {
@@ -28,9 +30,6 @@ async function loginUser(params) {
 
 //Sign Up User
 async function signupUser(params){
-    console.log("InsideSignUpServer");
-    console.log("SignUpUserJson",JSON.stringify(params));
-    console.log("SignUpUser",params);
     try{
         let response=await fetch(apiSignUpUser,{
             method:'POST',
@@ -50,9 +49,6 @@ async function signupUser(params){
 
 //Send Feedback Function 
 async function feedbackUser(params){
-    console.log("InsideFeedBackFunction");
-    console.log("FeedBackFunctionJson",JSON.stringify(params));
-    console.log("FeedBackFunctionJson",params);
     try{
         let response=await fetch(apiFeedbackUser,{
             method:'POST',
@@ -71,10 +67,22 @@ async function feedbackUser(params){
     
 }
 
+//Get All Placeses
+async function getAllPlaces(params){
+    console.log('Parameters',JSON.stringify(params));
+    console.log('Parameters',params);
+    console.log('ParametersTEXT',params.searchText);
+    console.log('Parameterslat_lng',params.lat_lng);
+
+    const response = await fetch(apiGoogleFindPlaces + params.lat_lng+ "&rankby=distance&keyword=" + params.searchText + "&key="+googleApiKey);
+     const json = await response.json();
+     return json;
+}
 
 export {loginUser};
 export{signupUser};
 export{feedbackUser};
+export{getAllPlaces};
 
 
 //*************Common Function ***************//

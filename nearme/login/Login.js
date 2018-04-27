@@ -37,32 +37,32 @@ export default class Login extends Component {
     };
   }
   funLoginUser() {
-    if (this.state._Email == null) {
-      //Alert.alert("Please Enter Email");
+      if (this.state._Email == null) {
+        //Alert.alert("Please Enter Email");
 
-      ToastAndroid.show('Please Enter Email', ToastAndroid.SHORT);
-      return
-    } else if (this.state._Password == null) {
-      //Alert.alert("Please Enter Password");
-      ToastAndroid.show('Please Enter Password', ToastAndroid.SHORT);
-      return;
-    }
-
-    const userInfo = {
-      email: this.state._Email,
-      password: this.state._Password,
-    };
-    //Call Function from server page
-    loginUser(userInfo).then((result) => {
-      console.log("LoginResponse", result);
-
-      if (result.status == 1) {
-        //Go to Home Screen
-        navigateToScreen('MyApp', this.props);
-      } else if (result.status == 0) {
-        //Alert.alert(result.message);
-        ToastAndroid.show(result.message, ToastAndroid.SHORT);
+        ToastAndroid.show('Please Enter Email', ToastAndroid.SHORT);
+        return
+      } else if (this.state._Password == null) {
+        //Alert.alert("Please Enter Password");
+        ToastAndroid.show('Please Enter Password', ToastAndroid.SHORT);
+        return;
       }
+
+      const userInfo = {
+        email: this.state._Email,
+        password: this.state._Password,
+      };
+    //Call Function from server page
+      loginUser(userInfo).then((result) => {
+        console.log("LoginResponse", result);
+
+        if (result.status == 1) {
+          //Go to Home Screen
+          navigateToScreen('MyApp', this.props);
+        } else if (result.status == 0) {
+          //Alert.alert(result.message);
+          ToastAndroid.show(result.message, ToastAndroid.SHORT);
+        }
 
     });
   }
