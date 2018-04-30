@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {
     Platform, StyleSheet, Text, View, AppRegistry, ScrollView,
     Image, TextInput, Button, TouchableOpacity, StatusBar,
-    Alert, ToastAndroid, ImageStore, ActivityIndicator,BackHandler
+    Alert, ToastAndroid, ImageStore, ActivityIndicator,BackHandler,
 } from 'react-native';
 
 import ImagePicker from 'react-native-image-picker';
@@ -123,21 +123,32 @@ export default class Feedback extends Component {
     formValidation() {
         let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
         if (this.state.name == null) {
-            ToastAndroid.show('Please enter name', ToastAndroid.SHORT);
+            this.checkOStoShowMsg('Please enter name');
             return;
         } else if (this.state.email == null) {
-            ToastAndroid.show('Please enter email', ToastAndroid.SHORT);
+            this.checkOStoShowMsg('Please enter email');
             return;
         } else if (reg.test(this.state.email) == false) {
-            ToastAndroid.show('Email is not correct', ToastAndroid.SHORT);
+           this.checkOStoShowMsg('Email is not correct');
+
             return;
         } else if (this.state.message == null) {
-            ToastAndroid.show('Please write your feedback', ToastAndroid.SHORT);
+          
+            this.checkOStoShowMsg('Please write your feedback');
+
             return;
         }
         //Call feedback api
         this.sendUserFeedback();
     }
+    checkOStoShowMsg(msg){
+        if(Platform.OS==='ios'){
+            Alert.alert('',msg);
+        }else{
+            ToastAndroid.show(msg, ToastAndroid.SHORT);
+        }
+    }
+    
     render() {
         return (
 

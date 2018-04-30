@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 import {
     View, Text, Image, StyleSheet, FlatList, ScrollView, TouchableOpacity, Alert,
-    TouchableHighlight, ActivityIndicator, BackHandler, Animated, TextInput, Dimensions
+    TouchableHighlight, ActivityIndicator, BackHandler, Animated, TextInput, Dimensions,ToastAndroid
 } from 'react-native';
 import Button from 'react-native-button';
 import Stars from 'react-native-stars';
@@ -12,7 +12,7 @@ import ListingScreen from './Listing'
 import getDirections from 'react-native-google-maps-directions';
 import Spinner from 'react-native-loading-spinner-overlay';
 
-import { getAllPlaces } from '../../ServerApi/Server.js'
+import { getAllPlaces,googleApiKey } from '../../ServerApi/Server.js'
 
 let screenWidth = Dimensions.get('window').width;
 
@@ -48,7 +48,7 @@ export default class Listing extends Component {
             Alert.alert("nullData");
         }
     }
-    //Get Nearby Places
+    //Get List of Nearby Places
     getAllNearByPlaces() {
         const urlParams = {
                     searchText: this.state.searchName,
@@ -62,15 +62,12 @@ export default class Listing extends Component {
                     visible: !this.state.visible,
                     navigationBarVisiblity: true,
                 });
-
             } else if (result.status == "ZERO_RESULTS") {
                 this.setState({
                     visible: !this.state.visible,
                     text: "No Result Found"
                 });
-                this.alertMsg('No Result Found');
-            
-
+                this.alertMsg('No Result Found');            
             } else {
                 this.setState({
                     visible: !this.state.visible,
@@ -104,10 +101,14 @@ export default class Listing extends Component {
             });
             this.props.navigation.dispatch(navigateAction);
         } else {
-            ToastAndroid.show('Your Loacation not found.', ToastAndroid.SHORT);
+            if(Platform.OS==='ios'){
+                Alert.alert('', 'Your Loacation not found.');
+            }else{
+                ToastAndroid.show('Your Loacation not found.', ToastAndroid.SHORT);
+            }
         }
     }
-    //Open GogleMap App whit source and destination 
+    //Open GogleMap App to get Direction 
     handleGetDirections = (lat1, lng1) => {
         const data = {
 
@@ -276,7 +277,7 @@ export default class Listing extends Component {
                                     backgroundColor: 'white'
                                 }}>
                                     <Image
-                                        source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + this.photRefrence + '&key=AIzaSyBq2vZw0vfoiTSm2DypMQ6-odWpsJYLCEc' }}
+                                        source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + this.photRefrence + '&key='+googleApiKey }}
                                         style={{ width: 120, height: 120, margin: 5 }}></Image>
 
                                     <View style={{

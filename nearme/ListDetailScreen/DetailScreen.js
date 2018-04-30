@@ -6,7 +6,7 @@ import Button from 'react-native-button';
 import Stars from 'react-native-stars';
 import Spinner from 'react-native-loading-spinner-overlay';
 import getDirections from 'react-native-google-maps-directions';
-
+import { getPlacesDetails,googleApiKey } from '../../ServerApi/Server.js'
 export default class DetailScreen extends Component {
 
     constructor(props) {
@@ -27,9 +27,35 @@ export default class DetailScreen extends Component {
 
     componentDidMount() {
 
-        console.log("InsideComponentDidMount", this.state.placeId);
-        this.fetchPlaceDetails();
+        this.getSearchPlaceDetails();
+        console.log("APIKEY_GOOGLE",googleApiKey)
     }
+//Open googl map to get direction 
+    getSearchPlaceDetails() {
+        getPlacesDetails(this.state.placeId).then((result) => {
+
+            if (result.status != "OK") {
+                this.setState({
+                    PlaceDetails: result.result,
+                    PlaceReviews: result.result.reviews,
+                    visible: this.state.visible,
+                    text: "Exceed API Daily Limits"
+
+                });
+            } else {
+                this.setState({
+                    PlaceDetails: result.result,
+                    PlaceReviews: result.result.reviews,
+                    visible: !this.state.visible,
+                    destinationLat: result.result.geometry.location.lat,
+                    destinationLng: result.result.geometry.location.lng,
+
+                });
+            }
+
+        })
+    }
+
     handleGetDirections = () => {
         const data = {
 
@@ -51,41 +77,8 @@ export default class DetailScreen extends Component {
 
         getDirections(data)
     }
-    fetchPlaceDetails = async () => {
-        try {
-            const response = await fetch("https://maps.googleapis.com/maps/api/place/details/json?placeid=" + this.state.placeId + "&key=AIzaSyBq2vZw0vfoiTSm2DypMQ6-odWpsJYLCEc");
-            const json = await response.json();
 
 
-            this.setState({
-                PlaceDetails: json.result,
-                PlaceReviews: json.result.reviews
-            });
-            if (json.status != "OK") {
-                this.setState({
-                    visible: this.state.visible,
-                    text: "Exceed API Daily Limits"
-
-                });
-            } else {
-                this.setState({
-                    PlaceDetails: json.result,
-                    PlaceReviews: json.result.reviews,
-                    visible: !this.state.visible,
-                    destinationLat:json.result.geometry.location.lat,
-                    destinationLng:json.result.geometry.location.lng,
-
-                });
-            }
-        } catch (error) {
-            console.error("ErrorAPIis", error);
-
-        }
-    }
-    review() {
-        //console.log("PlaceRevies", JSON.stringify(this.state.PlaceReviews));
-
-    }
     render() {
         let photRefrence;
         let openingHourStatus;
@@ -122,7 +115,6 @@ export default class DetailScreen extends Component {
                     <Spinner visible={this.state.visible} textContent={this.state.text}
                         textStyle={{ color: '#FFF' }}
                         cancelable={true} />
-                    {/* <Text>{this.state.placeId}</Text> */}
                     <View style={{
                         backgroundColor: '#3B227B', height: 50, alignItems: 'center',
                         justifyContent: 'space-between', flexDirection: 'row'
@@ -144,7 +136,7 @@ export default class DetailScreen extends Component {
                     </View>
 
                     <Image
-                        source={{ uri: "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=" + this.photRefrence + "&key=AIzaSyBq2vZw0vfoiTSm2DypMQ6-odWpsJYLCEc" }}
+                        source={{ uri: "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=" + this.photRefrence + "&key="+googleApiKey }}
                         style={{ height: 220, }}></Image>
 
                     <View style={{
@@ -167,7 +159,7 @@ export default class DetailScreen extends Component {
                                 marginTop: 8,
                                 marginLeft: 8,
                                 color: '#00695c',
-                            }} onPress={()=>this.handleGetDirections()}>
+                            }} onPress={() => this.handleGetDirections()}>
                                 Get Direction
                         </Button>
                         </View>
@@ -183,7 +175,7 @@ export default class DetailScreen extends Component {
                             }}>{this.state.PlaceDetails.rating}</Text>
 
                             <Stars
-                                value={this.state.PlaceDetails.rating}                                
+                                value={this.state.PlaceDetails.rating}
                                 spacing={4}
                                 starSize={16}
                                 count={5}
@@ -191,8 +183,10 @@ export default class DetailScreen extends Component {
                                 backingColor='#e8eded'
                                 fullStar={require('../../asset/star.png')}
                                 emptyStar={require('../../asset/empty_star.png')}
-                                halfStar={require('../../asset/half_star.png')} style={{ marginTop: 8,
-                                backgroundColor:"black  " }} />
+                                halfStar={require('../../asset/half_star.png')} style={{
+                                    marginTop: 8,
+                                    backgroundColor: "black  "
+                                }} />
                         </View>
 
 

@@ -1,12 +1,9 @@
 
 
 import React, { Component } from 'react';
-import {
-    View, Text, Image, StyleSheet,
-    TextInput, Dimensions, ScrollView,
-    TouchableHighlight, Platform, TouchableOpacity, Alert, PermissionsAndroid, StatusBar,
-    ToastAndroid, BackHandler, Animated
-} from 'react-native';
+import {View, Text,Image,StyleSheet,TextInput,Dimensions,ScrollView,TouchableHighlight,
+    Platform,TouchableOpacity,Alert,PermissionsAndroid,StatusBar,ToastAndroid,BackHandler,
+    } from 'react-native';
 import Button from 'react-native-button';
 import { learnColour } from '../../asset/left-menu.png';
 import { NavigationActions } from 'react-navigation';
@@ -16,6 +13,24 @@ import SplashScreen from 'react-native-splash-screen';
 let screenWidth = Dimensions.get('window').width;
 
 export default class Home extends Component {
+
+     //Check Input Text for empty or not
+     CheckTextInputIsEmptyOrNot() {
+        console.log("CurrentLat", this.state.lat_lng);
+        if (this.state.typedText != '') {
+
+            this.navigateToScreen('Listing');
+        } else {
+            if(Platform.OS==='ios'){
+                Alert.alert('', 'Please enter text');
+            }else{
+                ToastAndroid.show('Please enter text first', ToastAndroid.SHORT);
+            }
+            //Alert.alert('', 'Please enter text');
+        }
+
+    }
+    
     //Navigate to Next Screen
     navigateToScreen(name) {
         console.log("InSideNvigate");
@@ -30,7 +45,11 @@ export default class Home extends Component {
             });
             this.props.navigation.dispatch(navigateAction);
         } else {
-            ToastAndroid.show('Your Loacation not found.', ToastAndroid.SHORT);
+            if(Platform.OS==='ios'){
+                Alert.alert('', 'Your Loacation not found.');
+            }else{
+                ToastAndroid.show('Your Loacation not found.', ToastAndroid.SHORT);
+            }
         }
     }
 
@@ -47,25 +66,17 @@ export default class Home extends Component {
             error: null,
             inputText: '',
             lat_lng: null,
-            yPosition: new Animated.Value(0),
-            opecity: new Animated.Value(0),
         };
-        this._onSearchPressed = this._onSearchPressed.bind(this);
-        this.crossButtonClick = this.crossButtonClick.bind(this);
         //Handle BackPress
         BackHandler.addEventListener('hardwareBackPress', function () {
-            // Alert.alert("Bacl");
-            // props.navigation.navigate("Login");
             return true;
         });
 
     }
 
     componentDidMount() {
-        //HideSplas Screen After Launchig Home screen
         SplashScreen.hide();
 
-        //Ask For Permission When Open App
         this.getLocationPermissions();
     }
 
@@ -97,7 +108,6 @@ export default class Home extends Component {
         }
     }
 
-    // To get Current Location
     getCurrentLoc() {
         console.log("getCurrentLoc", "Inside");
 
@@ -115,46 +125,8 @@ export default class Home extends Component {
             { enableHighAccuracy: true, timeout: 100000, maximumAge: 0 }, );
     }
 
-    //Check Input Text for empty or not
-    CheckTextInputIsEmptyOrNot() {
-        console.log("CurrentLat", this.state.lat_lng);
-        if (this.state.typedText != '') {
+   
 
-            this.navigateToScreen('Listing');
-        } else {
-            ToastAndroid.show('Please enter text first', ToastAndroid.SHORT);
-            // Alert.alert('', 'Please enter text');
-
-        }
-
-    }
-    //Sercbox open
-    _onSearchPressed() {
-        Animated.parallel([
-            Animated.timing(this.state.yPosition, {
-                toValue: 68,
-                duration: 500
-            }),
-            Animated.timing(this.state.opecity, {
-                toValue: 1,
-                duration: 500
-            })
-        ]).start();
-    }
-    //Searchbox close
-    crossButtonClick() {
-        Animated.parallel([
-            Animated.timing(this.state.yPosition, {
-                toValue: -168,
-                duration: 500
-            }),
-            Animated.timing(this.state.opecity, {
-                toValue: 1,
-                duration: 500
-            })
-        ]).start();
-    }
-    
     render() {
         const { navigate } = this.props.navigation;
         const { params } = this.props.navigation.state;
@@ -170,7 +142,7 @@ export default class Home extends Component {
 
                     <View style={{ backgroundColor: '#3B227B', height: 50, alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', }}>
-                            <TouchableOpacity style={{ width: 60,height:50,justifyContent:'center' }} onPress={() => this.props.navigation.navigate("DrawerOpen")}>
+                            <TouchableOpacity style={{ width: 60, height: 50, justifyContent: 'center' }} onPress={() => this.props.navigation.navigate("DrawerOpen")}>
                                 <Image source={require('../../asset/left-menu.png')}
                                     style={{ height: 20, width: 20, marginLeft: 12, padding: 10, }}
                                 ></Image>
@@ -179,42 +151,13 @@ export default class Home extends Component {
                                 style={{ color: 'white', fontSize: 20, marginLeft: 0, fontWeight: 'bold' }}>Home
                             </Text>
                         </View>
-                        <TouchableOpacity style={{ marginRight: 10, }} onPress={this._onSearchPressed}>
+                        {/* <TouchableOpacity style={{ marginRight: 10, }} onPress={this._onSearchPressed}>
                             <View style={{ marginRight: 10, }}>
                                 <Image source={require('../../asset/serach-icon.png')}
                                     style={{ height: 20, width: 20 }}></Image>
                             </View>
-                        </TouchableOpacity>
-                        {/* SearchBox Implement */}
-                        <Animated.View style={[styles.searchBarStyle, animationStylee]}>
-                        <View style={{flexDirection:'row',width:screenWidth,justifyContent:'center'}}>
-                           <TouchableOpacity style={{justifyContent:'center',marginLeft:7 }}
-                                onPress={this.crossButtonClick}>
-                                <Image source={require('../../asset/delete.png')}
-                                    style={{ height: 15, width: 15,margin: 10, }}
-                                    onPress={this.crossButtonClick} />
+                        </TouchableOpacity> */}
 
-                            </TouchableOpacity>
-                            <TextInput placeholder="Search."
-                                underlineColorAndroid="transparent"
-                                style={{
-                                    height: 40,
-                                    flex: 1,
-                                    width: screenWidth,
-                                    padding: 10,
-                                    fontSize: 15,
-                                    color: 'black',
-                                }}
-                            />
-                            <TouchableOpacity style={{position: 'absolute',right:5 ,justifyContent:'center' }}
-                                onPress={this.crossButtonClick.bind(this)}>
-                                <Image source={require('../../asset/search_box.png')}
-                                    style={{ height: 15, width: 15, margin: 10, }}
-                                    onPress={this.crossButtonClick.bind(this)} />
-
-                            </TouchableOpacity>
-                            </View>
-                        </Animated.View>
                     </View>
 
                     <View style={{ flexDirection: 'column', alignItems: 'center', marginTop: 25, marginBottom: 10, }}>
@@ -300,7 +243,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: '#00bfa5',
         bottom: 70,
-        width:screenWidth,
+        width: screenWidth,
     }
 
 });
