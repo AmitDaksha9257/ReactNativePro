@@ -133,7 +133,6 @@ export default class Feedback extends Component {
 
             return;
         } else if (this.state.message == null) {
-          
             this.checkOStoShowMsg('Please write your feedback');
 
             return;
@@ -141,6 +140,7 @@ export default class Feedback extends Component {
         //Call feedback api
         this.sendUserFeedback();
     }
+    //Show Alert message according to Device
     checkOStoShowMsg(msg){
         if(Platform.OS==='ios'){
             Alert.alert('',msg);

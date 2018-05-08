@@ -40,6 +40,8 @@ import  Listing  from './nearme/ListingScreen/Listing.js'
 import Login from './nearme/login/Login.js';
 import Signup from './nearme/signup/Signup.js';
 import Feedback from './nearme/FeedbackScreen/Feedback.js';
+import AboutUs from './nearme/AboutUsScreen/AboutUs.js';
+import Help from './nearme/HelpScreen/Help.js';
 
 import SplashScreen from 'react-native-splash-screen';
 
@@ -51,6 +53,8 @@ const AppNavigtor = StackNavigator({
   Signup: { screen: Signup },
   Login: { screen: Login },
   Feedback:{screen: Feedback},
+  AboutUs:{screen:AboutUs},
+  Help:{screen:Help},
 },
   {
     headerMode: 'none'

@@ -1,8 +1,8 @@
 
 
 import React, { Component } from 'react';
-import {View, Text,Image,StyleSheet,TextInput,Dimensions,ScrollView,TouchableHighlight,
-    Platform,TouchableOpacity,Alert,PermissionsAndroid,StatusBar,ToastAndroid,BackHandler,
+import {View, Text,Image,StyleSheet,TextInput,Dimensions,ScrollView,TouchableHighlight,AppState,
+    Platform,TouchableOpacity,Alert,PermissionsAndroid,StatusBar,ToastAndroid,BackHandler,NetInfo
     } from 'react-native';
 import Button from 'react-native-button';
 import { learnColour } from '../../asset/left-menu.png';
@@ -16,7 +16,7 @@ export default class Home extends Component {
 
      //Check Input Text for empty or not
      CheckTextInputIsEmptyOrNot() {
-        console.log("CurrentLat", this.state.lat_lng);
+        if(this.state.status){
         if (this.state.typedText != '') {
 
             this.navigateToScreen('Listing');
@@ -28,14 +28,18 @@ export default class Home extends Component {
             }
             //Alert.alert('', 'Please enter text');
         }
-
+    }else{
+        Alert.alert('Message',
+        'No Network Connection.',
+        [
+            {text:'Try Again',onPress:()=> this.getLocationPermissions() }
+        ],
+    );
+    }
     }
     
     //Navigate to Next Screen
     navigateToScreen(name) {
-        console.log("InSideNvigate");
-        console.log("CurrentLat", this.state.lat_lng);
-
         if (this.state.lat_lng != null) {
 
 
@@ -66,9 +70,12 @@ export default class Home extends Component {
             error: null,
             inputText: '',
             lat_lng: null,
+            status:false
         };
         //Handle BackPress
         BackHandler.addEventListener('hardwareBackPress', function () {
+
+            AppState.removeEventListener('change', this.handleConnectionChange);
             return true;
         });
 
@@ -76,13 +83,33 @@ export default class Home extends Component {
 
     componentDidMount() {
         SplashScreen.hide();
+        NetInfo.isConnected.addEventListener('change', this.handleConnectionChange);
 
-        this.getLocationPermissions();
+        NetInfo.isConnected.fetch().done(
+            (isConnected)=>{
+                this.setState({status:isConnected});
+
+                this.getLocationPermissions();
+            }
+        );
+
+        
     }
+    handleConnectionChange=(isConnected)=>{
+        this.setState({status:isConnected});
+        if(!isConnected){
+            Alert.alert('','We Lost Connection.');
+        }
 
+    }
+    componentWillUnmount() {
+        console.log('ListScreenUnMouunt');
+        NetInfo.isConnected.removeEventListener('change', this.handleConnectionChange);
+      }
     // Check Location Permission
     async getLocationPermissions() {
-        console.log("getLocationPermission" + "iddidd");
+        console.log("getLocationPermission" ,this.state.status);
+        if(this.state.status){
         const chckLocationPermission = PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
 
         if (chckLocationPermission === PermissionsAndroid.RESULTS.GRANTED) {
@@ -106,6 +133,15 @@ export default class Home extends Component {
                 Alert.alert("LocationErroris" + err)
             }
         }
+    }else{
+        Alert.alert('Message',
+            'No Network Connection.',
+            [
+                {text:'Try Again',onPress:()=> this.getLocationPermissions() }
+            ],
+            {cancelable: false}
+        );
+    }
     }
 
     getCurrentLoc() {
@@ -142,7 +178,8 @@ export default class Home extends Component {
 
                     <View style={{ backgroundColor: '#3B227B', height: 50, alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', }}>
-                            <TouchableOpacity style={{ width: 60, height: 50, justifyContent: 'center' }} onPress={() => this.props.navigation.navigate("DrawerOpen")}>
+                            <TouchableOpacity style={{ width: 60, height: 50, justifyContent: 'center' }}
+                             onPress={() => this.props.navigation.navigate("DrawerOpen")}>
                                 <Image source={require('../../asset/left-menu.png')}
                                     style={{ height: 20, width: 20, marginLeft: 12, padding: 10, }}
                                 ></Image>

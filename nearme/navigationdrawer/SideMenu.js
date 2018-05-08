@@ -75,14 +75,15 @@ class SideMenu extends Component {
           </View>
         </TouchableWithoutFeedback >
         {/* Help Page */}
+        <TouchableWithoutFeedback onPress={this.navigateToScreen('Help')}>
         <View style={{ height: 50, flexDirection: 'row', alignItems: 'center' }}>
           <Image style={{ height: 25, width: 25, marginLeft: 15 }}
             source={require('../../asset/help-icon.png')}></Image>
           <Text style={{ fontSize: 14, marginLeft: 10, color: 'white', fontStyle: 'normal' }}>Help</Text>
         </View>
+        </TouchableWithoutFeedback>
         <View style={{ backgroundColor: '#4a2c77', height: 1, marginLeft: 15 }}>
         </View>
-
         {/* FeedBack Page */}
         <TouchableWithoutFeedback onPress={this.navigateToScreen('Feedback')}>
           <View style={{ height: 50, flexDirection: 'row', alignItems: 'center' }}>
@@ -97,11 +98,11 @@ class SideMenu extends Component {
           style={{ backgroundColor: '#4a2c77', height: 1, marginLeft: 15 }}
         ></View>
         {/* About Us */}
-        <TouchableWithoutFeedback >
+        <TouchableWithoutFeedback  onPress={this.navigateToScreen('AboutUs')}>
           <View style={{ height: 50, flexDirection: 'row', alignItems: 'center' }} >
             <Image style={{ height: 25, width: 25, marginLeft: 15 }}
               source={require('../../asset/about-us.png')}></Image>
-            <Text style={{ fontSize: 14, marginLeft: 10, color: 'white', fontStyle: 'normal' }}>About</Text>
+            <Text style={{ fontSize: 14, marginLeft: 10, color: 'white', fontStyle: 'normal' }}>About Us</Text>
           </View>
         </TouchableWithoutFeedback>
         <View

@@ -2,8 +2,8 @@
 
 import React, { Component } from 'react';
 import {
-    View, Text, Image, StyleSheet, FlatList, ScrollView, TouchableOpacity, Alert,
-    TouchableHighlight, ActivityIndicator, BackHandler, Animated, TextInput, Dimensions,ToastAndroid
+    View, Text, Image, StyleSheet, FlatList, ScrollView, TouchableOpacity, Alert, Keyboard, NetInfo, AppState,
+    TouchableHighlight, ActivityIndicator, BackHandler, Animated, TextInput, Dimensions, ToastAndroid, Platform
 } from 'react-native';
 import Button from 'react-native-button';
 import Stars from 'react-native-stars';
@@ -12,7 +12,7 @@ import ListingScreen from './Listing'
 import getDirections from 'react-native-google-maps-directions';
 import Spinner from 'react-native-loading-spinner-overlay';
 
-import { getAllPlaces,googleApiKey } from '../../ServerApi/Server.js'
+import { getAllPlaces, googleApiKey } from '../../ServerApi/Server.js'
 
 let screenWidth = Dimensions.get('window').width;
 
@@ -32,9 +32,11 @@ export default class Listing extends Component {
             yPositionAni: new Animated.Value(0),
             opecity: new Animated.Value(0),
             serachText: null,
+            status: false,
         }
         //Handle Backpress here
         BackHandler.addEventListener('hardwareBackPress', function () {
+            AppState.removeEventListener('change', this.handleConnectionChange);
             props.navigation.navigate("MyApp");
             return true;
         });
@@ -42,49 +44,67 @@ export default class Listing extends Component {
     }
 
     componentDidMount() {
-        if (this.state.searchName != null) {
-            this.getAllNearByPlaces();
-        } else {
-            Alert.alert("nullData");
-        }
+        NetInfo.isConnected.addEventListener('change', this.handleConnectionChange);
+        NetInfo.isConnected.fetch().done(
+            (isConnected) => {
+                this.setState({ status: isConnected });
+
+                this.getAllNearByPlaces();
+            }
+        );
+    }
+    handleConnectionChange = (isConnected) => {
+        this.setState({ status: isConnected });
     }
     //Get List of Nearby Places
     getAllNearByPlaces() {
-        const urlParams = {
-                    searchText: this.state.searchName,
-                    lat_lng: this.state.lat_lng,
-                 };
-        getAllPlaces(urlParams).then((result) => {
-            console.log("Status from server",result.status)
-            if (result.status == "OK") {
-                this.setState({
-                    allPlacesGoogle: result.results,
-                    visible: !this.state.visible,
-                    navigationBarVisiblity: true,
-                });
-            } else if (result.status == "ZERO_RESULTS") {
-                this.setState({
-                    visible: !this.state.visible,
-                    text: "No Result Found"
-                });
-                this.alertMsg('No Result Found');            
-            } else {
-                this.setState({
-                    visible: !this.state.visible,
-                    text: "Exceed API Daily Limits"
-                });
-                this.alertMsg('Exceed API Daily Limits');
-            }
-        });
+
+        if (this.state.status) {
+            const urlParams = {
+                searchText: this.state.searchName,
+                lat_lng: this.state.lat_lng,
+            };
+            getAllPlaces(urlParams).then((result) => {
+                console.log("Status from server", result.status)
+                if (result.status == "OK") {
+                    this.setState({
+                        allPlacesGoogle: result.results,
+                        visible: !this.state.visible,
+                        navigationBarVisiblity: true,
+                    });
+                } else if (result.status == "ZERO_RESULTS") {
+                    this.setState({
+                        visible: !this.state.visible,
+                        text: "No Result Found"
+                    });
+                    this.alertMsg('No Result Found');
+                } else {
+                    this.setState({
+                        visible: !this.state.visible,
+                        text: "Exceed API Daily Limits"
+                    });
+                    this.alertMsg('Exceed API Daily Limits');
+                }
+            });
+
+        } else {
+            Alert.alert('', 'No Network Connection');
+            this.setState({
+                navigationBarVisiblity: true,
+                visible: !this.state.visible,
+            })
+        }
     }
 
-    alertMsg(message){
+    alertMsg(message) {
         Alert.alert(
             'Message',
             message,
             [
                 { text: 'Ok', onPress: () => this.props.navigation.navigate("MyApp") }
-            ]
+            ], {
+                cancelable: false
+            }
         );
     }
     //Go to next page
@@ -93,17 +113,15 @@ export default class Listing extends Component {
         console.log("CurrentLat", this.state.lat_lng);
 
         if (this.state.lat_lng != null) {
-
-
             const navigateAction = NavigationActions.navigate({
                 routeName: name,
                 params: { placeSearch: this.state.serachText, LatLng: this.state.lat_lng }
             });
             this.props.navigation.dispatch(navigateAction);
         } else {
-            if(Platform.OS==='ios'){
+            if (Platform.OS === 'ios') {
                 Alert.alert('', 'Your Loacation not found.');
-            }else{
+            } else {
                 ToastAndroid.show('Your Loacation not found.', ToastAndroid.SHORT);
             }
         }
@@ -134,6 +152,7 @@ export default class Listing extends Component {
 
     //Sercbox open
     _onSearchPressed() {
+
         Animated.parallel([
             Animated.timing(this.state.yPositionAni, {
                 toValue: 68,
@@ -145,8 +164,11 @@ export default class Listing extends Component {
             })
         ]).start();
     }
+
+
     //Searchbox close
     crossSearchButtonClick() {
+        Keyboard.dismiss();
         Animated.parallel([
             Animated.timing(this.state.yPositionAni, {
                 toValue: -168,
@@ -160,9 +182,31 @@ export default class Listing extends Component {
     }
     //After SerachGo Click 
     searchGoClick() {
-        this.navigateToScreen('Listing');
+        Keyboard.dismiss();
+        if (this.state.status) {
+            if (this.state.serachText != null) {
+                this.navigateToScreen('Listing');
+            } else {
+                if (Platform.OS === 'ios') {
+                    Alert.alert("Please Enter Text First.");
+                } else {
+                    ToastAndroid.show('Please Enter Text First.', ToastAndroid.SHORT);
+                }
+            }
+        } else {
+
+            Alert.alert('Message',
+                'No Network Connection.',
+                [
+                    { text: 'Try Again', onPress: () => this.searchGoClick() }
+                ],
+            );
+        }
+
     }
-    
+
+
+
     render() {
         const { navigate } = this.props.navigation;
         const { params } = this.props.navigation.state;
@@ -277,7 +321,7 @@ export default class Listing extends Component {
                                     backgroundColor: 'white'
                                 }}>
                                     <Image
-                                        source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + this.photRefrence + '&key='+googleApiKey }}
+                                        source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + this.photRefrence + '&key=' + googleApiKey }}
                                         style={{ width: 120, height: 120, margin: 5 }}></Image>
 
                                     <View style={{
@@ -323,7 +367,7 @@ export default class Listing extends Component {
                                                 }}
                                                 onPress={() => navigate('DetialScreen', { placeID: item.place_id, placeSearch: this.state.searchName, LatLng: this.state.lat_lng })}>
                                                 View Details</Button>
-                                            <Button style={{
+                                             <Button style={{
                                                 fontSize: 14,
                                                 borderRadius: 3,
                                                 borderWidth: 2,
@@ -331,7 +375,7 @@ export default class Listing extends Component {
                                                 padding: 5,
                                                 marginLeft: 10,
                                             }} onPress={() => this.handleGetDirections(item.geometry.location.lat, item.geometry.location.lng)}>Get Direction</Button>
-
+                                                
                                         </View>
                                     </View>
 

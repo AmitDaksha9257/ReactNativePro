@@ -21,7 +21,6 @@ export default class DetailScreen extends Component {
             text: "Loading...",
             destinationLat: null,
             destinationLng: null,
-
         })
     }
 
